@@ -16,11 +16,9 @@ pub mod scoreboard {
 
     // Function - Add a new score to the scoreboard.
 
-    // Function - Remove a score from the scoreboard.
+    // Function - (Authority) Remove a score from the scoreboard.
 
-    // Function - Update a score on the scoreboard.
-
-    // Function - Get the top 10 scores on the scoreboard.
+    // Function - (Authority) Update a score on the scoreboard.
 
 
 }

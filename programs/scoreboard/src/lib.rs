@@ -1,42 +1,27 @@
 use anchor_lang::prelude::*;
+use std::mem::size_of;
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("BBYN3Ss1Kw8vTKdiWooEhRQYLmENNXtGyrYHsZumj7jh");
+
+const MAX_SCORES: usize = 10; // Define the maximum number of scores
 
 #[program]
 pub mod scoreboard {
     use super::*;
 
-    // Function - Initialize the program with the authority.
     pub fn initialize_scoreboard(ctx: Context<InitializeScoreboard>) -> Result<()> {
-        ctx.accounts.scoreboard.authority = *ctx.accounts.signer.key;
-        ctx.accounts.scoreboard.scores = Vec::new();
-        
+        let scoreboard = &mut ctx.accounts.scoreboard;
+        scoreboard.authority = *ctx.accounts.signer.key;
+        scoreboard.scores = Vec::new(); // Initialize the scores vector
         Ok(())
     }
 
-    // Function - Add a new score to the scoreboard.
-
-    // Function - Remove a score from the scoreboard.
-
-    // Function - Update a score on the scoreboard.
-
-    // Function - Get the top 10 scores on the scoreboard.
-
-
+    // Additional functions such as add_score, remove_score, etc.
 }
 
 #[derive(Accounts)]
 pub struct InitializeScoreboard<'info> {
-    #[account(
-        init,
-        seeds = [
-            b"scoreboard",
-            signer.key().as_ref(),
-        ],
-        bump,
-        payer = signer,
-        space = 1000
-    )] //size can be refactored to enhance program size -> https://www.anchor-lang.com/docs/space
+    #[account(init, payer = signer, space = 8 + 32 + (8 + size_of::<Score>() * MAX_SCORES))]
     pub scoreboard: Account<'info, Scoreboard>,
     #[account(mut)]
     pub signer: Signer<'info>,
@@ -49,14 +34,9 @@ pub struct Scoreboard {
     pub scores: Vec<Score>,
 }
 
-#[account]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct Score {
+    pub player: Pubkey,
     pub score: u64,
-    pub name: String,
     pub timestamp: i64,
-    pub nft_used: Pubkey,
-    pub authority: Pubkey,
 }
-
-
-// Create Error Types

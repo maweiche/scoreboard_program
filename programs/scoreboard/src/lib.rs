@@ -18,6 +18,25 @@ pub mod scoreboard {
     }
 
     // Additional functions for managing the scoreboard
+
+    // Function to add a new score to the scoreboard
+    pub fn add_score(ctx: Context<AddScoreContext>, player: Pubkey, score: u64, timestamp: i64) -> Result<()> {
+        let scoreboard = &mut ctx.accounts.scoreboard;
+        let new_score = Score { player, score, timestamp };
+
+        // Add the new score to the scoreboard
+        scoreboard.scores.push(new_score);
+
+        Ok(())
+    }
+
+}
+
+
+#[derive(Accounts)]
+pub struct AddScoreContext<'info> {
+    #[account(mut)]
+    pub scoreboard: Account<'info, Scoreboard>,
 }
 
 #[derive(Accounts)]

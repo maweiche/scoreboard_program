@@ -3,6 +3,7 @@ import { Program, Provider, web3 } from '@coral-xyz/anchor';
 import { PublicKey, SystemProgram, Keypair } from '@solana/web3.js';
 import { Scoreboard } from '../target/types/scoreboard';
 import assert from 'assert';
+import { BN } from 'bn.js';
 
 describe('scoreboard', () => {
    
@@ -53,5 +54,50 @@ describe('scoreboard', () => {
        
         // Assuming 'scores' is a valid field
         assert.deepEqual(scoreboardAccount.scores, []);
+
+
+
+        // New test for adding a score starts here
+        console.log("Starting test for adding a new score");
+
+        // Random public key for testing
+        const playerPublicKey = new PublicKey("CKKSMTiLBFqaXVv5yMapooAp4FpSjDuV4FxKWQaANK3S");
+        const newScore = {
+            player: playerPublicKey,
+            score: new BN(100), 
+            timestamp: new BN(new Date().getTime()) 
+        };
+
+        try {
+            const addScoreTx = await program.methods.addScore(newScore.player, newScore.score, newScore.timestamp)
+                .accounts({
+                    scoreboard: scoreboardPda,
+                })
+                .signers([testSigner])
+                .rpc();
+            console.log("Add score transaction", addScoreTx);
+        } catch (error) {
+            console.error("Error during addScore transaction:", error);
+        }
+        
+
+        
+        const scoreboardState = await program.account.scoreboard.fetch(scoreboardPda);
+        console.log("Scoreboard state:", scoreboardState);
+        
+
+     
+
+        // Fetch the updated scoreboard
+        const updatedScoreboard = await program.account.scoreboard.fetch(scoreboardPda);
+
+        // Check if the new score is added
+        const scoreFound = updatedScoreboard.scores.some(score => 
+            score.player.toBase58() === newScore.player.toBase58() &&
+            score.score === newScore.score &&
+            score.timestamp === newScore.timestamp
+        );
+        assert.ok(scoreFound, "New score should be added to the scoreboard");
+        console.log("New score successfully added to the scoreboard");
     });
 });

@@ -9,6 +9,7 @@ const MAX_SCORES: usize = 10; // Define the maximum number of scores
 pub mod scoreboard {
     use super::*;
 
+    // Initializes the scoreboard
     pub fn initialize_scoreboard(ctx: Context<InitializeScoreboard>) -> Result<()> {
         let scoreboard = &mut ctx.accounts.scoreboard;
         scoreboard.authority = *ctx.accounts.signer.key;
@@ -16,12 +17,18 @@ pub mod scoreboard {
         Ok(())
     }
 
-    // Additional functions such as add_score, remove_score, etc.
+    // Additional functions for managing the scoreboard
 }
 
 #[derive(Accounts)]
 pub struct InitializeScoreboard<'info> {
-    #[account(init, payer = signer, space = 8 + 32 + (8 + size_of::<Score>() * MAX_SCORES))]
+    #[account(
+        init,
+        payer = signer,
+        space = 8 + 32 + (8 + size_of::<Score>() * MAX_SCORES),
+        seeds = [b"scoreboard", signer.key().as_ref()],
+        bump
+    )]
     pub scoreboard: Account<'info, Scoreboard>,
     #[account(mut)]
     pub signer: Signer<'info>,

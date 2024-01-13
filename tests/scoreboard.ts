@@ -1,5 +1,5 @@
-import * as anchor from '@project-serum/anchor';
-import { Program, Provider, web3 } from '@project-serum/anchor';
+import * as anchor from '@coral-xyz/anchor';
+import { Program, Provider, web3 } from '@coral-xyz/anchor';
 import { PublicKey, SystemProgram, Keypair } from '@solana/web3.js';
 import { Scoreboard } from '../target/types/scoreboard';
 import assert from 'assert';
@@ -13,21 +13,29 @@ describe('scoreboard', () => {
     const program = anchor.workspace.Scoreboard as Program<Scoreboard>;
 
     it('Initializes the scoreboard', async () => {
+       
         const testSigner = Keypair.generate();
 
-        const [scoreboardPda, _] = await PublicKey.findProgramAddressSync(
+        const res = await anchor.getProvider().connection.requestAirdrop(testSigner.publicKey, 1e9);
+        await anchor.getProvider().connection.confirmTransaction(res, "confirmed");
+
+
+        const [scoreboardPda] = anchor.web3.PublicKey.findProgramAddressSync(
             [Buffer.from("scoreboard"), testSigner.publicKey.toBuffer()],
             program.programId,
         );
 
-        const tx = await program.rpc.initializeScoreboard({
-            accounts: {
+        const tx = await program.methods.initializeScoreboard()
+            .accounts( 
+                {
                 scoreboard: scoreboardPda,
-                signer: provider.wallet.publicKey,
-                systemProgram: SystemProgram.programId,
-            },
-            signers: [testSigner],
-        });
+                signer: testSigner.publicKey,
+                systemProgram: anchor.web3.SystemProgram.programId,
+                }
+            )
+            .signers([testSigner])
+            .rpc();
+        console.log("init transaction",tx);
 
         await provider.connection.confirmTransaction(tx);
 
@@ -37,5 +45,3 @@ describe('scoreboard', () => {
         assert.deepEqual(scoreboardAccount.scores, []);
     });
 });
-
-

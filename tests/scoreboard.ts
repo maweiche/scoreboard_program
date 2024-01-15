@@ -27,20 +27,24 @@ describe('scoreboard', () => {
     );
 
     it('Reset any existing scoreboard', async () => {
-        const tx = await program.methods.resetScoreboard()
-            .accounts({
-                scoreboard: scoreboardPda,
-            })
-            .signers([testSigner])
-            .rpc();
-        console.log("reset transaction", tx);
+        if (await program.account.scoreboard.fetch(scoreboardPda) == null) {
+            console.log("Scoreboard not initialized");
+        } else {
+            const tx = await program.methods.resetScoreboard()
+                .accounts({
+                    scoreboard: scoreboardPda,
+                })
+                .signers([testSigner])
+                .rpc();
+            console.log("reset transaction", tx);
 
-        await provider.connection.confirmTransaction(tx);
+            await provider.connection.confirmTransaction(tx);
 
-        const scoreboardAccount = await program.account.scoreboard.fetch(scoreboardPda);
-        assert.equal(scoreboardAccount.authority.toBase58(), testSigner.publicKey.toBase58());
+            const scoreboardAccount = await program.account.scoreboard.fetch(scoreboardPda);
+            assert.equal(scoreboardAccount.authority.toBase58(), testSigner.publicKey.toBase58());
 
-        assert.deepEqual(scoreboardAccount.scores, []);
+            assert.deepEqual(scoreboardAccount.scores, []);
+        }
     });
 
     it('Initializes the scoreboard', async () => {

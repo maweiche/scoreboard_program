@@ -48,7 +48,6 @@ describe('scoreboard', () => {
     });
 
     it('Initializes the scoreboard', async () => {
-
         if (await program.account.scoreboard.fetch(scoreboardPda) == null) {
             console.log("Scoreboard not initialized");
         
@@ -80,7 +79,7 @@ describe('scoreboard', () => {
         const timestamp = new BN(Date.now());
         const addScoreTx = await program.methods
             .addScore(
-                new BN(100),
+                new BN(80),
                 timestamp
             )
             .accounts({
@@ -109,7 +108,41 @@ describe('scoreboard', () => {
             decodedData.scores[0].player.toBase58(),
             testSigner.publicKey.toBase58()
         );
-        assert.equal(decodedData.scores[0].score.toString(), "100");
+        assert.equal(decodedData.scores[0].score.toString(), "80");
+        assert.equal(decodedData.scores[0].timestamp.toString(), timestamp.toString());
+    });
+
+    it('Player adds higher score', async () => {
+        const timestamp = new BN(Date.now());
+        const addScoreTx = await program.methods
+            .addScore(
+                new BN(90),
+                timestamp
+            )
+            .accounts({
+                scoreboard: scoreboardPda,
+            })
+            .signers([testSigner])
+            .rpc();
+
+        console.log("addScore transaction", addScoreTx);
+
+        const scoreboard = await program.provider.connection.getAccountInfo(
+            scoreboardPda
+        );
+
+        const scoreboardData = scoreboard.data;
+        const decodedData = program.coder.accounts.decode(
+            "Scoreboard",
+            scoreboardData
+        );
+        console.log("Decoded data", decodedData);
+
+        assert.equal(
+            decodedData.scores[0].player.toBase58(),
+            testSigner.publicKey.toBase58()
+        );
+        assert.equal(decodedData.scores[0].score.toString(), "90");
         assert.equal(decodedData.scores[0].timestamp.toString(), timestamp.toString());
     });
 

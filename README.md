@@ -23,7 +23,7 @@ This is a simple Solana program that implements a scoreboard built for Elusiv's 
     scoreboard = "3uj1ZssrUsXA5rMJRj9M5tq4smLdyjNFAvTknvGKBX21" 
     ```
 8. Run `anchor build` and `anchor deploy` again for ProgramId to take effect.
-9. Run `anchor test` to run the tests.
+9. Run `anchor test --skip-local-validator` to run the tests.
 
 
     

@@ -26,9 +26,12 @@ pub mod scoreboard {
         // Add the new score to the scoreboard
         scoreboard.scores.push(new_score);
 
+        // Sort the scoreboard
+        scoreboard.scores.sort_by(|a, b| b.score.cmp(&a.score));
+
         Ok(())
     }
-
+    
     // Function to reset scoreboard
     pub fn reset_scoreboard(ctx: Context<ResetScoreboardContext>) -> Result<()> {
         let scoreboard = &mut ctx.accounts.scoreboard;

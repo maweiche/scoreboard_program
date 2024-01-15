@@ -9,95 +9,104 @@ describe('scoreboard', () => {
    
 // Configure the client to use the local cluster.
     const provider = anchor.AnchorProvider.local();
-  
+
+    // Wallet is from the wallet path in your Anchor.toml file
+    const wallet = anchor.workspace.Scoreboard.provider.wallet.payer;
 
     const program = anchor.workspace.Scoreboard as Program<Scoreboard>;
     
-    const testSigner = Keypair.generate();
+    const testSigner = wallet;
 
-      // for debugging purposes
+    // for debugging purposes
     console.log("Seeds for PDA:", ["scoreboard", testSigner.publicKey.toBase58()]);
+    console.log("testSigner's Public Key:", testSigner.publicKey.toBase58());
 
+    const [scoreboardPda] = anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("scoreboard"), testSigner.publicKey.toBuffer()],
+        program.programId,
+    );
 
-    it('Initializes the scoreboard', async () => {
-       
-    
-
-        const res = await anchor.getProvider().connection.requestAirdrop(testSigner.publicKey, 1e9);
-        await anchor.getProvider().connection.confirmTransaction(res, "confirmed");
-
-
-        const [scoreboardPda] = anchor.web3.PublicKey.findProgramAddressSync(
-            [Buffer.from("scoreboard"), testSigner.publicKey.toBuffer()],
-            program.programId,
-        );
-
-        const tx = await program.methods.initializeScoreboard()
-            .accounts( 
-                {
+    it('Reset any existing scoreboard', async () => {
+        const tx = await program.methods.resetScoreboard()
+            .accounts({
                 scoreboard: scoreboardPda,
-                signer: testSigner.publicKey,
-                systemProgram: anchor.web3.SystemProgram.programId,
-                }
-            )
+            })
             .signers([testSigner])
             .rpc();
-        console.log("init transaction",tx);
+        console.log("reset transaction", tx);
 
         await provider.connection.confirmTransaction(tx);
 
-        // for debugging purposes
-        console.log("testSigner's Public Key:", testSigner.publicKey.toBase58());
-
         const scoreboardAccount = await program.account.scoreboard.fetch(scoreboardPda);
         assert.equal(scoreboardAccount.authority.toBase58(), testSigner.publicKey.toBase58());
-       
-        // Assuming 'scores' is a valid field
+
         assert.deepEqual(scoreboardAccount.scores, []);
+    });
 
+    it('Initializes the scoreboard', async () => {
 
+        if (await program.account.scoreboard.fetch(scoreboardPda) == null) {
+            console.log("Scoreboard not initialized");
+        
 
-        // New test for adding a score starts here
-        console.log("Starting test for adding a new score");
-
-        // Random public key for testing
-        const playerPublicKey = new PublicKey("CKKSMTiLBFqaXVv5yMapooAp4FpSjDuV4FxKWQaANK3S");
-        const newScore = {
-            player: playerPublicKey,
-            score: new BN(100), 
-            timestamp: new BN(new Date().getTime()) 
-        };
-
-        try {
-            const addScoreTx = await program.methods.addScore(newScore.player, newScore.score, newScore.timestamp)
-                .accounts({
+            const tx = await program.methods.initializeScoreboard()
+                .accounts( 
+                    {
                     scoreboard: scoreboardPda,
-                })
+                    signer: testSigner.publicKey,
+                    systemProgram: anchor.web3.SystemProgram.programId,
+                    }
+                )
                 .signers([testSigner])
                 .rpc();
-            console.log("Add score transaction", addScoreTx);
-        } catch (error) {
-            console.error("Error during addScore transaction:", error);
+            console.log("init transaction",tx);
+
+            await provider.connection.confirmTransaction(tx);
+        } else {
+            console.log("Scoreboard already initialized");
         }
-        
-
-        
-        const scoreboardState = await program.account.scoreboard.fetch(scoreboardPda);
-        console.log("Scoreboard state:", scoreboardState);
-        
-
-     
-
-        // Fetch the updated scoreboard
-        const updatedScoreboard = await program.account.scoreboard.fetch(scoreboardPda);
-
-        // Check if the new score is added
-        const scoreFound = updatedScoreboard.scores.some(score => 
-            score.player.toBase58() === newScore.player.toBase58() &&
-            score.score === newScore.score &&
-            score.timestamp === newScore.timestamp
-        );
-        assert.ok(scoreFound, "New score should be added to the scoreboard");
-        console.log("New score successfully added to the scoreboard");
+        const scoreboardAccount = await program.account.scoreboard.fetch(scoreboardPda);
+        assert.equal(scoreboardAccount.authority.toBase58(), testSigner.publicKey.toBase58());
+    
+        // Assuming 'scores' is a valid field
+        assert.deepEqual(scoreboardAccount.scores, []);
     });
+
+    it('Player adds new score', async () => {
+        const timestamp = new BN(Date.now());
+        const addScoreTx = await program.methods
+            .addScore(
+                new BN(100),
+                timestamp
+            )
+            .accounts({
+                scoreboard: scoreboardPda,
+            })
+            .signers([testSigner])
+            .rpc();
+
+        console.log("addScore transaction", addScoreTx);
+        
+        const scoreboard = await program.provider.connection.getAccountInfo(
+            scoreboardPda
+        );
+
+        const scoreboardData = scoreboard.data;
+        const decodedData = program.coder.accounts.decode(
+            "Scoreboard",
+            scoreboardData
+        );
+        console.log("Decoded data", decodedData);
+        console.log("player", decodedData.scores[0].player.toBase58());
+        console.log("score", decodedData.scores[0].score.toString());
+        console.log("timestamp", decodedData.scores[0].timestamp.toString());
+
+        assert.equal(
+            decodedData.scores[0].player.toBase58(),
+            testSigner.publicKey.toBase58()
+        );
+        assert.equal(decodedData.scores[0].score.toString(), "100");
+        assert.equal(decodedData.scores[0].timestamp.toString(), timestamp.toString());
+    });
+
 });

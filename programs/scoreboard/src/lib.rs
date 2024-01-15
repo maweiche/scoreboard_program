@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use std::mem::size_of;
 
-declare_id!("BBYN3Ss1Kw8vTKdiWooEhRQYLmENNXtGyrYHsZumj7jh");
+declare_id!("3uj1ZssrUsXA5rMJRj9M5tq4smLdyjNFAvTknvGKBX21");
 
 const MAX_SCORES: usize = 10; // Define the maximum number of scores
 
@@ -17,11 +17,10 @@ pub mod scoreboard {
         Ok(())
     }
 
-    // Additional functions for managing the scoreboard
-
     // Function to add a new score to the scoreboard
-    pub fn add_score(ctx: Context<AddScoreContext>, player: Pubkey, score: u64, timestamp: i64) -> Result<()> {
+    pub fn add_score(ctx: Context<AddScoreContext>, score: u64, timestamp: i64) -> Result<()> {
         let scoreboard = &mut ctx.accounts.scoreboard;
+        let player = ctx.accounts.signer.key();
         let new_score = Score { player, score, timestamp };
 
         // Add the new score to the scoreboard
@@ -30,13 +29,12 @@ pub mod scoreboard {
         Ok(())
     }
 
-}
-
-
-#[derive(Accounts)]
-pub struct AddScoreContext<'info> {
-    #[account(mut)]
-    pub scoreboard: Account<'info, Scoreboard>,
+    // Function to reset scoreboard
+    pub fn reset_scoreboard(ctx: Context<ResetScoreboardContext>) -> Result<()> {
+        let scoreboard = &mut ctx.accounts.scoreboard;
+        scoreboard.scores = Vec::new(); // Reset the scores vector
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -52,6 +50,21 @@ pub struct InitializeScoreboard<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
     pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct AddScoreContext<'info> {
+    #[account(mut)]
+    pub scoreboard: Account<'info, Scoreboard>,
+    /// CHECK: The signer is the player who's score is being added
+    #[account(signer)]
+    pub signer: AccountInfo<'info>,
+}
+
+#[derive(Accounts)]
+pub struct ResetScoreboardContext<'info> {
+    #[account(mut)]
+    pub scoreboard: Account<'info, Scoreboard>,
 }
 
 #[account]

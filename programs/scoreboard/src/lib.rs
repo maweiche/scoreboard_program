@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use std::mem::size_of;
 
-declare_id!("3uj1ZssrUsXA5rMJRj9M5tq4smLdyjNFAvTknvGKBX21");
+declare_id!("7hKh8Q6Z9eRczCtw45dpzhGywvG52yJqtfbruGrmsHEg");
 
 const MAX_SCORES: usize = 10; // Define the maximum number of scores
 
@@ -27,11 +27,11 @@ pub mod scoreboard {
         scoreboard.scores.push(new_score);
 
         // Sort the scoreboard
-        scoreboard.scores.sort_by(|a, b| b.score.cmp(&a.score));
+        scoreboard.scores.sort_by(|a: &Score, b| b.score.cmp(&a.score));
 
         Ok(())
     }
-    
+
     // Function to reset scoreboard
     pub fn reset_scoreboard(ctx: Context<ResetScoreboardContext>) -> Result<()> {
         let scoreboard = &mut ctx.accounts.scoreboard;

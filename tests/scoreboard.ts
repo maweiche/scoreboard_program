@@ -27,9 +27,9 @@ describe('scoreboard', () => {
     );
 
     it('Reset any existing scoreboard', async () => {
-        if (await program.account.scoreboard.fetch(scoreboardPda) == null) {
-            console.log("Scoreboard not initialized");
-        } else {
+        // if (await program.account.scoreboard.fetch(scoreboardPda) == null) {
+        //     console.log("Scoreboard not initialized");
+        // } else {
             const tx = await program.methods.resetScoreboard()
                 .accounts({
                     scoreboard: scoreboardPda,
@@ -44,11 +44,11 @@ describe('scoreboard', () => {
             assert.equal(scoreboardAccount.authority.toBase58(), testSigner.publicKey.toBase58());
 
             assert.deepEqual(scoreboardAccount.scores, []);
-        }
+        // }
     });
 
     it('Initializes the scoreboard', async () => {
-        if (await program.account.scoreboard.fetch(scoreboardPda) == null) {
+        // if (await program.account.scoreboard.fetch(scoreboardPda) == null) {
             console.log("Scoreboard not initialized");
         
 
@@ -65,9 +65,9 @@ describe('scoreboard', () => {
             console.log("init transaction",tx);
 
             await provider.connection.confirmTransaction(tx);
-        } else {
-            console.log("Scoreboard already initialized");
-        }
+        // } else {
+        //     console.log("Scoreboard already initialized");
+        // }
         const scoreboardAccount = await program.account.scoreboard.fetch(scoreboardPda);
         assert.equal(scoreboardAccount.authority.toBase58(), testSigner.publicKey.toBase58());
     
@@ -76,7 +76,7 @@ describe('scoreboard', () => {
     });
 
     it('Player adds new score', async () => {
-        const timestamp = new BN(Date.now());
+        const timestamp = new BN(Date.now()); // ex. 1628580000000
         const addScoreTx = await program.methods
             .addScore(
                 new BN(80),

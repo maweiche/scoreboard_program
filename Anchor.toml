@@ -2,7 +2,7 @@
 seeds = false
 skip-lint = false
 [programs.localnet]
-scoreboard = "3uj1ZssrUsXA5rMJRj9M5tq4smLdyjNFAvTknvGKBX21"
+scoreboard = "7hKh8Q6Z9eRczCtw45dpzhGywvG52yJqtfbruGrmsHEg"
 
 [registry]
 url = "https://api.apr.dev"

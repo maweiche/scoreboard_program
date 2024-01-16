@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use std::mem::size_of;
 
-declare_id!("2qjPLYfvkTNB95mDgcnq4s8myTig2g1ya7HQfXwWJK5A");
+declare_id!("5avBkwggqfVGFiuVf7jucTX2vzsCmMZ8ikxMgFknY1eJ");
 
 const MAX_SCORES: usize = 20; // Define the maximum number of scores
 

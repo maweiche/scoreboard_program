@@ -1,14 +1,14 @@
 [features]
 seeds = false
 skip-lint = false
-[programs.localnet]
-scoreboard = "2qjPLYfvkTNB95mDgcnq4s8myTig2g1ya7HQfXwWJK5A"
+[programs.devnet]
+scoreboard = "5avBkwggqfVGFiuVf7jucTX2vzsCmMZ8ikxMgFknY1eJ"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "Devnet"
 wallet = "/Users/matt/.config/solana/id.json"
 
 [scripts]

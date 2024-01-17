@@ -7,8 +7,7 @@ import { BN } from 'bn.js';
 
 describe('scoreboard', () => {
    
-// Configure the client to use the local cluster.
-    const provider = anchor.AnchorProvider.local();
+    anchor.setProvider(anchor.AnchorProvider.env());
 
     // Wallet is from the wallet path in your Anchor.toml file
     const wallet = anchor.workspace.Scoreboard.provider.wallet.payer;
@@ -38,7 +37,7 @@ describe('scoreboard', () => {
                 .rpc();
             console.log("reset transaction", tx);
 
-            await provider.connection.confirmTransaction(tx);
+            await program.provider.connection.confirmTransaction(tx);
 
             const scoreboardAccount = await program.account.scoreboard.fetch(scoreboardPda);
             assert.equal(scoreboardAccount.authority.toBase58(), testSigner.publicKey.toBase58());
@@ -56,7 +55,6 @@ describe('scoreboard', () => {
                 .accounts( 
                     {
                     scoreboard: scoreboardPda,
-                    signer: testSigner.publicKey,
                     systemProgram: anchor.web3.SystemProgram.programId,
                     }
                 )
@@ -64,7 +62,7 @@ describe('scoreboard', () => {
                 .rpc();
             console.log("init transaction",tx);
 
-            await provider.connection.confirmTransaction(tx);
+            await program.provider.connection.confirmTransaction(tx);
         // } else {
         //     console.log("Scoreboard already initialized");
         // }

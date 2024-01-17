@@ -61,7 +61,7 @@ pub struct InitializeScoreboard<'info> {
         init,
         payer = signer,
         space = 8 + 32 + (8 + size_of::<Score>() * MAX_SCORES),
-        seeds = [b"scoreboard", signer.key().as_ref()],
+        seeds = [b"scoreboard"],
         bump
     )]
     pub scoreboard: Account<'info, Scoreboard>,

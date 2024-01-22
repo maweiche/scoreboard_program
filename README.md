@@ -2,11 +2,12 @@
 
 This is a simple Solana program that implements a scoreboard built for Elusiv's Bootcamp Project. It is intended to be used as a reference for how to write Solana programs.
 
-## Goals
+## Functionality
 
-- [✅] allow users to submit their scores to a scoreboard.
-- [x] allow users to retrieve their own score from the scoreboard.
-
+- `initialize_scoreboard` - Initializes the scoreboard that can hold a max of 20 scores. Uses seeds: `scoreboard` & `signer.key().as_ref()`
+- `add_score` - Adds a score (player, score, timestamp) to the scoreboard with the signer as player, requires inputs `score` & `timestamp`
+- `reset_scoreboard` - Resets the scoreboard to an empty state, requires signer to be the authority
+ 
 
 
 ## To run locally:
